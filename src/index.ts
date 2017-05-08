@@ -24,6 +24,4 @@ if (cluster.isMaster) {
     app.post('/', linebotParser);
 
     const server = app.listen(PORT);
-
-    console.log(`Worker ${process.pid} started`);
 }

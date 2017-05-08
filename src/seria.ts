@@ -79,7 +79,11 @@ bot.on('message', (event: Event) => {
 
     switch (command[0]) {
         case 'help':
-            event.reply('此功能開發中！');
+            event.reply([
+                '目前賽麗亞能接受的指令如下：',
+                '* seria help -- 查詢指令',
+                '* seria turtle [weekday] -- 查詢團表, weekday: wed/sat/sun',
+            ].join('\n'));
             break;
         case 'turtle':
             turtleHandler(event, command.splice(1, command.length));
