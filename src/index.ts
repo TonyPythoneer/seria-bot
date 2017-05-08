@@ -70,7 +70,7 @@ async function turtleHandler(event: Event, command: string[]) {
 
 bot.on('message', (event: Event) => {
     if (event.message.type !== 'text') return;
-    let command = event.message.text.split('');
+    let command = event.message.text.split(' ');
     console.log(event.message.text);
     console.log(command);
     let length = command.length;
