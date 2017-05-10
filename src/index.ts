@@ -2,11 +2,11 @@ import * as cluster from 'cluster';
 import * as express from 'express';
 import { cpus } from 'os';
 
-import { bot } from './seria';
+import { PORT } from './config';
+import { runServer } from './server';
 
 
 const CPU_NUM = cpus().length;
-const PORT = process.env.PORT || 8080;
 
 
 if (cluster.isMaster) {
@@ -18,10 +18,5 @@ if (cluster.isMaster) {
         console.log(`worker ${worker.process.pid} died`);
     });
 } else {
-    const app = express();
-
-    const linebotParser = bot.parser();
-    app.post('/', linebotParser);
-
-    const server = app.listen(PORT);
+    runServer();
 }

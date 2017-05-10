@@ -1,10 +1,10 @@
-import { RecordWithTtl } from 'dns';
 import axios from 'axios';
 import * as _ from 'lodash';
+import * as qs from 'qs';
+
+import * as config from './config';
 
 
-const { SPEADSHEET_ID, GOOGLE_API_KEY } = process.env;
-const GOOGLE_SPEADSHEET_API = 'https://sheets.googleapis.com/v4/spreadsheets';
 const SHEETS = {
     Wed: '出團確認(三)',
     Sat: '出團確認(六)',
@@ -18,17 +18,12 @@ const GROUPS = {
     fifth: 'H10:K14',
     sixth: 'H17:K21'
 };
-
-
 const ATTENDANCE_STATUS = {
     present: { red: 1, green: 1, },
     unavailable: { red: 1 },
     absent: { red: 1, green: 1, blue: 1 },
 };
 
-let GoogleSpreadsheetApi = axios.create({
-    baseURL: GOOGLE_SPEADSHEET_API
-});
 
 const NameAndJobRegx = new RegExp('(\.+)\\((\.+)\\)');
 function getMembername(member: string) {
@@ -67,6 +62,7 @@ function rollCallHandler(rows: any[]) {
     return { slotNum, unavailableList, absentList };
 }
 
+
 function getGroups(res) {
     let data = res.data;
     let sheets: any[] = data.sheets;
@@ -76,29 +72,21 @@ function getGroups(res) {
 }
 
 
-async function getSomething() {
-    let res = await GoogleSpreadsheetApi.get(`/${SPEADSHEET_ID}`, {
-        params: {
-            key: GOOGLE_API_KEY,
-            includeGridData: true,
-            ranges: `${SHEETS.Wed}!${GROUPS.first}`,
-        }
-    });
+let GoogleSpreadsheetApi = axios.create({
+    baseURL: config.GOOGLE_SPEADSHEET_API
+});
 
-    let groups = getGroups(res);
-    let results = rollCallHandler(groups);
-}
 
 export async function readTable(weekday: string) {
     let getConfig = (group) => ({
         params: {
-            key: GOOGLE_API_KEY,
+            key: config.GOOGLE_API_KEY,
             includeGridData: true,
             ranges: `${SHEETS[weekday]}!${group}`,
         }
     });
     let requests = Object.keys(GROUPS).map(ordinal => {
-        return GoogleSpreadsheetApi.get(`/${SPEADSHEET_ID}`, getConfig(GROUPS[ordinal]));
+        return GoogleSpreadsheetApi.get(`/${config.SPEADSHEET_ID}`, getConfig(GROUPS[ordinal]));
     });
 
     let responses = await axios.all(requests);
@@ -151,3 +139,107 @@ export async function readTable(weekday: string) {
     }, '');
     return result;
 }
+
+
+/**
+ *
+ * @param weekday
+ */
+interface ValueRange {
+    range: string;
+    majorDimension: string;
+    values: any[][];
+}
+type ValueRanges = ValueRange[];
+
+
+// http://stackoverflow.com/questions/10179815/how-do-you-get-the-loop-counter-index-using-a-for-in-syntax-in-javascript/10179849#10179849
+function* enumerate<T>(iterable: T[]) {
+    let index = 0;
+
+    for (const item of iterable) {
+        yield { index, item };
+        index++;
+    }
+}
+
+
+export async function checkTable(weekday: string) {
+    // https://developers.google.com/sheets/api/samples/reading
+    // Read multiple ranges
+
+    let reqConfig = {
+        params: {
+            key: config.GOOGLE_API_KEY,
+            ranges: Object.keys(GROUPS).map(key => `${SHEETS[weekday]}!${GROUPS[key]}`),
+            valueRenderOption: 'FORMULA',
+            dateTimeRenderOption: 'SERIAL_NUMBER',
+        },
+        paramsSerializer: params => qs.stringify(params, { arrayFormat: 'repeat' }),
+    };
+
+    let totalMembers = [];
+    let totalErrorMembers = [];
+    let groupMembers = [];
+    let groupErrorMembers = [];
+    let totalErrorMsg = '';
+    let groupErrorMsg = '';
+
+    try {
+        let res = await GoogleSpreadsheetApi.get(`/${config.SPEADSHEET_ID}/values:batchGet`, reqConfig);
+        let data = res.data;
+        let valueRanges: ValueRanges = data.valueRanges;
+
+        for (let elem of enumerate(valueRanges)) {
+            let groupIndex = elem.index;
+            let group = valueRanges[groupIndex].values;
+
+            for (let elem of enumerate(group)) {
+                let partyIndex = elem.index;
+                let party = group[partyIndex];
+
+                for (let elem of enumerate(party)) {
+                    let memberIndex = elem.index;
+                    let member = party[memberIndex];
+
+                    if (!member) continue;
+
+                    if (totalMembers.indexOf(member) !== -1) totalErrorMembers.push(member);
+                    totalMembers.push(member);
+
+                    let membername = getMembername(member);
+                    if (groupMembers.indexOf(membername) !== -1) groupErrorMembers.push(membername);
+                    groupMembers.push(membername);
+                }
+            }
+
+            // console.log(groupMembers);
+
+            // console.log(groupErrorMembers);
+            if (groupErrorMembers.length > 0) {
+                groupErrorMsg += `* 第 ${groupIndex + 1} 團: ${groupErrorMembers.join('、')}\n`;
+            }
+            groupErrorMembers = [];
+            groupMembers = [];
+        }
+
+        // console.log(totalMembers);
+        // console.log(totalErrorMembers);
+        if (totalErrorMembers.length > 0) {
+            totalErrorMsg += `* 總表重複人物: ${totalErrorMembers.join('、')}\n`;
+        }
+
+        if (totalErrorMsg === '' && groupErrorMsg === '') return '沒有任何重複安排的人員唷~！';
+
+        let finalMsgList = [];
+        if (totalErrorMsg !== '') finalMsgList.push(totalErrorMsg);
+        if (groupErrorMsg !== '') finalMsgList.push(groupErrorMsg);
+        return finalMsgList.join('\n');
+
+    } catch (e) {
+        console.log(e);
+        return '阿拉德大陸出事了！請通知管理員！';
+    }
+}
+
+// checkTable('Wed').then(console.log);
