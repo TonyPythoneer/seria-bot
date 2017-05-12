@@ -39,7 +39,8 @@ bot.on('leave', (event: Event) => {
 
 bot.on('message', (event: Event) => {
     if (event.message.type !== 'text') return;
-    let command = event.message.text.split(' ');
+    let text = event.message.text.toLowerCase();
+    let command = text.split(' ');
     console.log(event.message.text);
     console.log(command);
     let length = command.length;
