@@ -1,3 +1,5 @@
+import 'bluebird-ployfill';
+
 import * as cluster from 'cluster';
 import * as express from 'express';
 import { cpus } from 'os';

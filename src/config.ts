@@ -18,3 +18,11 @@ export const LINE_BOT_CONFIG = {
 // Google application
 export const { SPEADSHEET_ID, GOOGLE_API_KEY } = process.env;
 export const GOOGLE_SPEADSHEET_API = 'https://sheets.googleapis.com/v4/spreadsheets';
+
+//
+export const { REDIS_HOST, REDIS_PORT, REDIS_PASSWORD } = process.env;
+export const REDIS_CONFIG = {
+    host: REDIS_HOST,
+    port: REDIS_PORT,
+    password: REDIS_PASSWORD,
+};
