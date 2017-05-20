@@ -17,11 +17,11 @@ class Command {
 
 
 const commands: Command[] = [
-    new Command('seria help', '查詢指令', callHelp),
-    new Command('seria health', '查詢賽麗亞是否正常服務', getHealth),
-    new Command('seria version', '查詢賽麗亞的目前服務版本', getVersion),
-    new Command('turtle query (wed|sat|sun)', '查詢團表出缺席狀況', queryTurtleSheet),
-    new Command('turtle check (wed|sat|sun)', '查詢團表是否有誤', checkTurtleSheet),
+    new Command('seria help', '列出指令', callHelp),
+    new Command('seria health', '服務是否正常', getHealth),
+    new Command('seria version', '目前版本', getVersion),
+    new Command('turtle query (wed|sat|sun)', '列出團表出缺席狀況', queryTurtleSheet),
+    new Command('turtle check (wed|sat|sun)', '團表是否有誤', checkTurtleSheet),
 ];
 
 async function callHelp() {
@@ -33,7 +33,7 @@ async function callHelp() {
 
     let lines = commands.map(command => {
         let { name, description } = command;
-        let line = `* ${name} :${description}`;
+        let line = `* ${name} -- ${description}`;
         return line;
     });
     let message = lines.join('\n');
