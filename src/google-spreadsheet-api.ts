@@ -2,7 +2,7 @@ import axios from 'axios';
 import * as _ from 'lodash';
 import * as qs from 'qs';
 
-import * as config from './config';
+import * as config from './core/config';
 
 
 const SHEETS = {

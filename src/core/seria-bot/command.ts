@@ -1,8 +1,7 @@
 import { repeat, capitalize } from 'lodash';
 
-const packageJson = require('./../package.json');
-import * as api from './google-spreadsheet-api';
-
+import { VERSION } from './../config';
+import * as api from './../../google-spreadsheet-api';
 
 
 class Command {
@@ -14,6 +13,31 @@ class Command {
         this.regexp = new RegExp(`^${name}$`);
     }
 }
+
+/*TODO
+class ParentCommand {
+    public regexp: RegExp;
+
+    constructor(public name: string,
+        public description: string,
+        public func?: (arg?: string) => Promise<string>) {
+        this.regexp = new RegExp(`^${name}`);
+    }
+}
+
+class CommandGroup {
+    constructor(public parent: ParentCommand,
+        public childs?: Command[]) {
+    }
+}
+
+
+const CommandPatterns = [
+    new CommandGroup(new ParentCommand('help', '列出所有指令集')),
+    new CommandGroup(new ParentCommand('seria', '賽麗亞為你提供 DNF 最新資訊')),
+    new CommandGroup(new ParentCommand('turtle', '20 人烏龜團表資訊')),
+];
+*/
 
 
 const commands: Command[] = [
@@ -42,7 +66,6 @@ async function callHelp() {
 }
 
 async function getVersion() {
-    const VERSION = packageJson.version;
     return `目前版本為 ${VERSION} 唷！`;
 }
 

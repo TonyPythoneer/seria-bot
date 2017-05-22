@@ -1,7 +1,7 @@
 import * as express from 'express';
 
-import { PORT } from './config';
-import { bot } from './seria';
+import { PORT } from './core/config';
+import bot from './core/seria-bot';
 
 
 const app = express();

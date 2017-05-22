@@ -4,7 +4,7 @@ import * as cluster from 'cluster';
 import * as express from 'express';
 import { cpus } from 'os';
 
-import { PORT } from './config';
+import { PORT } from './core/config';
 import { runServer } from './server';
 
 

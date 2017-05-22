@@ -1,10 +1,9 @@
 import LineBot = require('linebot');
 import * as _ from 'lodash';
 
-import { LINE_BOT_CONFIG, VERSION } from './config';
-import * as api from './google-spreadsheet-api';
-import { parseText } from './seria-bot';
-const packageJson = require('./../package.json');
+import { LINE_BOT_CONFIG, VERSION } from './../config';
+import * as api from './../../google-spreadsheet-api';
+import { parseText } from './command';
 
 
 interface Event {
@@ -25,7 +24,7 @@ interface Event {
     reply: (kind: string) => Promise<string>;
 }
 
-export let bot = LineBot(LINE_BOT_CONFIG);
+let bot = LineBot(LINE_BOT_CONFIG);
 
 
 bot.on('join', (event: Event) => {
@@ -44,3 +43,5 @@ bot.on('message', async function (event: Event) {
     let message = await parseText(text);
     if (message) event.reply(await message);
 });
+
+export default bot;

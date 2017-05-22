@@ -1,8 +1,7 @@
-const packageJson = require('./../package.json');
-
+const packageJson = require('./../../package.json');
 
 // project info
-export const VERSION = packageJson.version;
+export const VERSION: string = packageJson.version;
 
 // web application server
 export const PORT = process.env.PORT || 8080;
