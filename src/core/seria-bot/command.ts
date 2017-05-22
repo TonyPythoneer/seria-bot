@@ -1,7 +1,10 @@
 import { repeat, capitalize } from 'lodash';
 
+
 import { VERSION } from './../config';
 import * as api from './../../google-spreadsheet-api';
+import { Event } from './../..//event/models';
+import { CrawlDFOENEvents, CrawlDFOTWEvents } from './../..//event/commands';
 
 
 class Command {
@@ -39,9 +42,10 @@ const CommandPatterns = [
 ];
 */
 
-
 const commands: Command[] = [
     new Command('seria help', '列出指令', callHelp),
+    new Command('seria events', '列出活動', listEvents),
+    new Command('seria events update', '手動更新活動', updateEvents),
     new Command('seria health', '服務是否正常', getHealth),
     new Command('seria version', '目前版本', getVersion),
     new Command('turtle query (wed|sat|sun)', '列出團表出缺席狀況', queryTurtleSheet),
@@ -50,8 +54,7 @@ const commands: Command[] = [
 
 async function callHelp() {
     let maxLength = commands.reduce((maxLength, command) => {
-        let { name, description } = command;
-        let length = name.length;
+        let length = command.name.length;
         return length > maxLength ? length : maxLength;
     }, 0);
 
@@ -61,8 +64,26 @@ async function callHelp() {
         return line;
     });
     let message = lines.join('\n');
-
     return message;
+}
+
+async function listEvents() {
+    let events = await Event.listCurrentEvents();
+    if (events.length === 0) return '現在沒有活動！';
+    let eventList = events.map(event => {
+        if (event.translation_url === null) {
+            return `* name: ${event.english_name}\n`;
+        } else {
+            return `* name: ${event.chinese_name}\n* link: ${event.translation_url}\n`;
+        }
+    });
+    return eventList.join('\n');
+}
+
+async function updateEvents() {
+    await CrawlDFOENEvents();
+    await CrawlDFOTWEvents();
+    return '活動更新完成囉！';
 }
 
 async function getVersion() {
@@ -73,12 +94,12 @@ async function getHealth() {
     return `感謝冒險者您的關心，賽麗雅目前仍可以服務大家喔！`;
 }
 
-async function checkTurtleSheet(weekday) {
+async function checkTurtleSheet(weekday: string) {
     weekday = capitalize(weekday);
     return await api.checkTable(weekday);
 }
 
-async function queryTurtleSheet(weekday) {
+async function queryTurtleSheet(weekday: string) {
     weekday = capitalize(weekday);
     return await api.readTable(weekday);
 }
