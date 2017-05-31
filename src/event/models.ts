@@ -1,7 +1,8 @@
 import { Document, model, Model, Schema, Types } from 'mongoose';
+import mongodb from './../core/mongodb';
 
 
-const ALPHABET = '123456789abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ';
+const ALPHABET = '0123456789abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ';
 const ALPHABET_LENGTH = ALPHABET.length;
 const divmod = (dividend, divisor) => {
     let quotient = Math.floor(dividend / divisor);
@@ -16,9 +17,8 @@ const EventSchema = new Schema({
     translation_url: { type: String },
     start_at: { type: Date, required: true },
     end_at: { type: Date, required: true },
-    hashcode: { type: String, unique: true },
+    hashcode: { type: String, unique: true, index: true },
 });
-EventSchema.index({ english_name: 'text' });
 export interface EventProperties {
     english_name: string;
     chinese_name?: string;
@@ -31,7 +31,8 @@ export interface EventProperties {
 
 class EventClass {
     setHashcode(this: EventDocument) {
-        let num = this._id.getTimestamp().getTime();
+        let inc = this._id.toHexString().slice(18, 24);
+        let num = parseInt(inc, 16);
         let encoded = '';
         while (num) {
             let [quotient, remainder] = divmod(num, ALPHABET_LENGTH);
@@ -51,24 +52,25 @@ class EventClass {
         let event = new this(doc);
         event.setHashcode();
         try { return await event.save(); }
-        catch (err) { throw err; }
+        catch (err) { console.log(err); throw err; }
     }
     static async listCurrentEvents(this: EventModel) {
         let now = new Date();
         let events = await this.find({
-            start_at: { $gte: now },
-            end_at: { $lt: now },
+            start_at: { $lt: now },
+            end_at: { $gte: now },
         });
         return events;
     }
-    static async searchAndUpdate(this: EventModel, text: string,
+    static async findEventAndUpdate(this: EventModel, englishName: string,
         { chineseName, translationUrl }: { chineseName: string; translationUrl: string }) {
-        let event = await this.findOne({ $text: { $search: text } });
-        if (event) {
-            event.chinese_name = chineseName;
-            event.translation_url = translationUrl;
-            try { await event.save(); }
-            catch (err) { throw err; }
+        let query = { english_name: englishName, chinese_name: null };
+        let update = { chinese_name: chineseName, translation_url: translationUrl };
+        try {
+            let event = await this.findOneAndUpdate(query, update, { new: true }).exec();
+            console.log(event);
+        } catch (err) {
+            throw err;
         }
     }
 }
@@ -81,4 +83,4 @@ interface EventModel extends Model<EventDocument>, Statics { }
 
 
 EventSchema.loadClass(EventClass);
-export const Event = model<EventDocument, EventModel>('Event', EventSchema);
+export const Event = mongodb.model<EventDocument, EventModel>('Event', EventSchema);

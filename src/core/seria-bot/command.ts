@@ -3,7 +3,7 @@ import { repeat, capitalize } from 'lodash';
 
 import { VERSION } from './../config';
 import * as api from './../../google-spreadsheet-api';
-import { Event } from './../..//event/models';
+import { Event } from './../../event/models';
 import { CrawlDFOENEvents, CrawlDFOTWEvents } from './../..//event/commands';
 
 
@@ -71,8 +71,8 @@ async function listEvents() {
     let events = await Event.listCurrentEvents();
     if (events.length === 0) return '現在沒有活動！';
     let eventList = events.map(event => {
-        if (event.translation_url === null) {
-            return `* name: ${event.english_name}\n`;
+        if (!event.translation_url) {
+            return `* name: ${event.english_name}\n* link: 還沒有中文翻譯連結`;
         } else {
             return `* name: ${event.chinese_name}\n* link: ${event.translation_url}\n`;
         }
@@ -116,3 +116,5 @@ export async function parseText(text: string) {
     }
     return null;
 }
+
+

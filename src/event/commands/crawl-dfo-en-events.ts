@@ -29,12 +29,17 @@ export async function CrawlDFOENEvents() {
             return eventInfoText;
         });
         let [startAt, endAt] = parseDate(eventDateText);
-
         await Event.createEvent(eventNameText, startAt, endAt);
     });
 }
 
 
+async function main() {
+    await CrawlDFOENEvents();
+    // that should use eventlistener to close proess
+}
+
+
 if (require.main === module) {
-    CrawlDFOENEvents();
+    main();
 }
