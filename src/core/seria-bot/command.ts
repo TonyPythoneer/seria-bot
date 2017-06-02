@@ -72,7 +72,7 @@ async function listEvents() {
     if (events.length === 0) return '現在沒有活動！';
     let eventList = events.map(event => {
         if (!event.translation_url) {
-            return `* name: ${event.english_name}\n* link: 還沒有中文翻譯連結`;
+            return `* name: ${event.english_name}\n* link: 還沒有中文翻譯連結\n`;
         } else {
             return `* name: ${event.chinese_name}\n* link: ${event.translation_url}\n`;
         }

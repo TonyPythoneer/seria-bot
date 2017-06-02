@@ -1,6 +1,6 @@
 {
   "name": "seria-bot",
-  "version": "0.2.0",
+  "version": "0.2.2",
   "main": "dist/index.js",
   "repository": "https://github.com/TonyPythoneer/seria-bot.git",
   "author": "TonyPythoneer <tonypythoneer@gmail.com>",
@@ -25,7 +25,6 @@
     "@types/bluebird": "^3.5.4",
     "@types/cheerio": "^0.22.1",
     "@types/mongoose": "^4.7.13",
-    "@types/natural": "^0.2.32",
     "axios": "^0.16.1",
     "bluebird": "^3.5.0",
     "bluebird-ployfill": "^1.0.1",
@@ -35,7 +34,6 @@
     "linebot": "^1.3.0",
     "lodash": "^4.17.4",
     "mongoose": "^4.10.4",
-    "natural": "^0.5.1",
     "qs": "^6.4.0",
     "redis": "^2.7.1"
   }
