@@ -1,14 +1,32 @@
 import * as express from 'express';
+import * as path from 'path';
 
-import { PORT } from './core/config';
+import { PORT, PROJECT_DIR } from './core/config';
 import bot from './core/seria-bot';
+import { ExpressUrlpatterns } from './lib/types';
 
 
+function importExpressUrlpatterns(appname: string) {
+    let appdir = path.resolve(PROJECT_DIR, appname, 'controllers');
+    let urlpatterns: ExpressUrlpatterns = require(appdir).default;
+    return urlpatterns;
+}
+
+
+const EXPRESS_APPS = [
+    'event'
+];
 const app = express();
 
-const linebotParser = bot.parser();
-
-app.post('/', linebotParser);
+app.post('/', bot.parser());
+EXPRESS_APPS.forEach(appname => {
+    let urlpatterns = importExpressUrlpatterns(appname);
+    if (urlpatterns) {
+        let { url, router } = urlpatterns;
+        app.use(url, router);
+        // if (DEBUG) console.log(`  * ${appname}: ${url}`)
+    }
+});
 
 
 export function runServer() {

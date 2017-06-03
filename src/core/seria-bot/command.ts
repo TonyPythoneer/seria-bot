@@ -1,7 +1,7 @@
 import { repeat, capitalize } from 'lodash';
 
 
-import { VERSION } from './../config';
+import { HOST, VERSION } from './../config';
 import * as api from './../../google-spreadsheet-api';
 import { Event } from './../../event/models';
 import { CrawlDFOENEvents, CrawlDFOTWEvents } from './../..//event/commands';
@@ -17,7 +17,7 @@ class Command {
     }
 }
 
-/*TODO
+/*TODOprocess.env.NODE_ENV;
 class ParentCommand {
     public regexp: RegExp;
 
@@ -74,7 +74,7 @@ async function listEvents() {
         if (!event.translation_url) {
             return `* name: ${event.english_name}\n* link: 還沒有中文翻譯連結\n`;
         } else {
-            return `* name: ${event.chinese_name}\n* link: ${event.translation_url}\n`;
+            return `* name: ${event.chinese_name}\n* link: ${HOST}${event.hashcode}\n`;
         }
     });
     return eventList.join('\n');

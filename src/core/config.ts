@@ -1,4 +1,23 @@
+import { resolve } from 'path';
+
 const packageJson = require('./../../package.json');
+
+// Host
+export const HOST = (() => {
+    switch (process.env.NODE_ENV) {
+        case 'production':
+            return 'https://seria-bot.herokuapp.com';
+        case 'development':
+            return 'https://seria-bot-beta.herokuapp.com';
+        default:
+            return 'https://seria-bot.herokuapp.com';
+    }
+})();
+
+// Directories
+export const BASE_DIR = __dirname;
+export const PROJECT_DIR = resolve(BASE_DIR, '..');
+export const VIEWS_DIR = resolve(PROJECT_DIR, 'views');
 
 // project info
 export const VERSION: string = packageJson.version;
