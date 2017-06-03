@@ -12,7 +12,7 @@ router.route('/:hashcode')
         let hashcode: string = req.params['hashcode'];
         let event = await Event.findOne({ hashcode });
         if (event) return res.redirect(event.translation_url);
-        return res.status(404);
+        return res.status(404).end();
     });
 
 

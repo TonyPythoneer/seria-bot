@@ -74,7 +74,7 @@ async function listEvents() {
         if (!event.translation_url) {
             return `* name: ${event.english_name}\n* link: 還沒有中文翻譯連結\n`;
         } else {
-            return `* name: ${event.chinese_name}\n* link: ${HOST}${event.hashcode}\n`;
+            return `* name: ${event.chinese_name}\n* link: ${HOST}/e/${event.hashcode}\n`;
         }
     });
     return eventList.join('\n');
