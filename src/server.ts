@@ -2,7 +2,6 @@ import * as express from 'express';
 import * as path from 'path';
 
 import { PORT, PROJECT_DIR } from './core/config';
-import bot from './core/seria-bot';
 import { ExpressUrlpatterns } from './lib/types';
 
 
@@ -13,22 +12,27 @@ function importExpressUrlpatterns(appname: string) {
 }
 
 
-const EXPRESS_APPS = [
-    'event'
-];
-const app = express();
+function createApplicationServer() {
+    const app = express();
+    const EXPRESS_APPS = [
+        'event',
+        'seria-bot',
+    ];
 
-app.post('/', bot.parser());
-EXPRESS_APPS.forEach(appname => {
-    let urlpatterns = importExpressUrlpatterns(appname);
-    if (urlpatterns) {
-        let { url, router } = urlpatterns;
-        app.use(url, router);
-        // if (DEBUG) console.log(`  * ${appname}: ${url}`)
+    for (let appname of EXPRESS_APPS) {
+        let urlpatterns = importExpressUrlpatterns(appname);
+        if (urlpatterns) {
+            let { url, router } = urlpatterns;
+            app.use(url, router);
+            console.log(`Install express app: ${appname}, ${url}`);
+        }
     }
-});
+
+    return app;
+}
 
 
 export function runServer() {
+    const app = createApplicationServer();
     const server = app.listen(PORT);
 }

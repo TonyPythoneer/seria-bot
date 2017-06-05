@@ -2,7 +2,7 @@ import axios from 'axios';
 import * as _ from 'lodash';
 import * as qs from 'qs';
 
-import * as config from './core/config';
+import * as config from './../core/config';
 
 
 const SHEETS = {
@@ -10,6 +10,19 @@ const SHEETS = {
     Sat: '出團確認(六)',
     Sun: '出團確認(日)',
 };
+const ROWS = 4;
+const COLUMNS = 3;
+const BASE = 'A2';
+const range = (num: number) => Array.from(Array(num).keys());
+
+// 'a'.charCodeAt(0)
+// String.fromCharCode(97);
+const GROUP_TABLE = (() => {
+    const result = {};
+    // for
+})();
+
+
 const GROUPS = {
     first: 'B3:E7',
     second: 'B10:E14',
@@ -18,6 +31,12 @@ const GROUPS = {
     fifth: 'H10:K14',
     sixth: 'H17:K21'
 };
+const STATUS = {
+    yes: { red: 1, green: 1, },  // yellow
+    no: { red: 1 },  // red
+    unfilled: { red: 1, green: 1, blue: 1 },  // white
+};
+
 const ATTENDANCE_STATUS = {
     present: { red: 1, green: 1, },
     unavailable: { red: 1 },

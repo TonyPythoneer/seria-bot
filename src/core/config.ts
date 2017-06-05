@@ -2,15 +2,20 @@ import { resolve } from 'path';
 
 const packageJson = require('./../../package.json');
 
+
 // Host
+const HOST_TYPE = {
+    PRODUCTION: 'https://seria-bot.herokuapp.com',
+    DEVELOPMENT: 'https://seria-bot-beta.herokuapp.com',
+};
 export const HOST = (() => {
     switch (process.env.NODE_ENV) {
         case 'production':
-            return 'https://seria-bot.herokuapp.com';
+            return HOST_TYPE.PRODUCTION;
         case 'development':
-            return 'https://seria-bot-beta.herokuapp.com';
+            return HOST_TYPE.DEVELOPMENT;
         default:
-            return 'https://seria-bot.herokuapp.com';
+            return HOST_TYPE.PRODUCTION;
     }
 })();
 

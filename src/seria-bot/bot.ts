@@ -1,9 +1,9 @@
 import LineBot = require('linebot');
 import * as _ from 'lodash';
 
-import { LINE_BOT_CONFIG, VERSION } from './../config';
-import * as api from './../../google-spreadsheet-api';
-import { parseText } from './command';
+import { LINE_BOT_CONFIG, VERSION } from './../core/config';
+import * as api from './google-spreadsheet-api';
+import { parseText } from './scenarios';
 
 
 interface Event {

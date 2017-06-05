@@ -1,10 +1,9 @@
 import { repeat, capitalize } from 'lodash';
 
-
-import { HOST, VERSION } from './../config';
-import * as api from './../../google-spreadsheet-api';
+import * as api from './../google-spreadsheet-api';
+import { HOST, VERSION } from './../../core/config';
 import { Event } from './../../event/models';
-import { CrawlDFOENEvents, CrawlDFOTWEvents } from './../..//event/commands';
+import { CrawlDFOENEvents, CrawlDFOTWEvents } from './../../event/commands';
 
 
 class Command {
