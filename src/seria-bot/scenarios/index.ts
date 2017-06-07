@@ -49,6 +49,7 @@ const commands: Command[] = [
     new Command('seria version', '目前版本', getVersion),
     new Command('turtle query (wed|sat|sun)', '列出團表出缺席狀況', queryTurtleSheet),
     new Command('turtle check (wed|sat|sun)', '團表是否有誤', checkTurtleSheet),
+    new Command('turtle query (wed|sat|sun) unjoin', '列出團表出缺席狀況', queryUnjoinTurtleSheet),
 ];
 
 async function callHelp() {
@@ -101,6 +102,11 @@ async function checkTurtleSheet(weekday: string) {
 async function queryTurtleSheet(weekday: string) {
     weekday = capitalize(weekday);
     return await api.readTable(weekday);
+}
+
+async function queryUnjoinTurtleSheet(weekday: string) {
+    weekday = capitalize(weekday);
+    return await api.getUnjoinMembers(weekday);
 }
 
 export async function parseText(text: string) {

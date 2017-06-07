@@ -10,19 +10,6 @@ const SHEETS = {
     Sat: '出團確認(六)',
     Sun: '出團確認(日)',
 };
-const ROWS = 4;
-const COLUMNS = 3;
-const BASE = 'A2';
-const range = (num: number) => Array.from(Array(num).keys());
-
-// 'a'.charCodeAt(0)
-// String.fromCharCode(97);
-const GROUP_TABLE = (() => {
-    const result = {};
-    // for
-})();
-
-
 const GROUPS = {
     first: 'B3:E7',
     second: 'B10:E14',
@@ -182,7 +169,6 @@ function* enumerate<T>(iterable: T[]) {
     }
 }
 
-
 export async function checkTable(weekday: string) {
     // https://developers.google.com/sheets/api/samples/reading
     // Read multiple ranges
@@ -261,4 +247,65 @@ export async function checkTable(weekday: string) {
     }
 }
 
-// checkTable('Wed').then(console.log);
+
+export async function getUnjoinMembers(weekday: string) {
+    //
+    let reqConfig = {
+        params: {
+            key: config.GOOGLE_API_KEY,
+            majorDimension: 'COLUMNS',
+        }
+    };
+    let res: any = await GoogleSpreadsheetApi.get(`/${config.SPEADSHEET_ID}/values/${encodeURI('總表')}!A3:A`, reqConfig);
+    let values = res.data.values;
+    let list: string[] = values[0];
+    let nameList = list.filter(elem => !!elem);
+
+    //
+    let reqConfig2 = {
+        params: {
+            key: config.GOOGLE_API_KEY,
+            ranges: Object.keys(GROUPS).map(key => `${SHEETS[weekday]}!${GROUPS[key]}`),
+            valueRenderOption: 'FORMULA',
+            dateTimeRenderOption: 'SERIAL_NUMBER',
+        },
+        paramsSerializer: params => qs.stringify(params, { arrayFormat: 'repeat' }),
+    };
+    try {
+        let res2 = await GoogleSpreadsheetApi.get(`/${config.SPEADSHEET_ID}/values:batchGet`, reqConfig2);
+        let data = res2.data;
+        let valueRanges: ValueRanges = data.valueRanges;
+        let totalMembers = [];
+        let totalErrorMembers = [];
+
+        for (let elem of enumerate(valueRanges)) {
+            let groupIndex = elem.index;
+            let group = valueRanges[groupIndex].values;
+
+            for (let elem of enumerate(group)) {
+                let partyIndex = elem.index;
+                let party = group[partyIndex];
+
+                for (let elem of enumerate(party)) {
+                    let memberIndex = elem.index;
+                    let member = party[memberIndex];
+
+                    if (!member) continue;
+
+
+                    let membername = getMembername(member);
+                    if (totalMembers.indexOf(membername) === -1) totalMembers.push(membername);
+
+                }
+            }
+        }
+
+        let unjoinList = _.difference(nameList, totalMembers);
+        console.log(`* 未出席名單：\n${unjoinList.join(', ')}`);
+        return `* 未出席名單：\n${unjoinList.join(', ')}`;
+
+    } catch (err) {
+        console.log(err);
+        return '阿拉德大陸出事了！請通知管理員！';
+    }
+}
