@@ -39,14 +39,13 @@ export const LINE_BOT_CONFIG = {
 };
 
 // Google application
-export const { SPEADSHEET_ID, GOOGLE_API_KEY } = process.env;
+export const { SPREADSHEET_ID, SPEADSHEET_ID, GOOGLE_API_KEY } = process.env;
 export const GOOGLE_SPEADSHEET_API = 'https://sheets.googleapis.com/v4/spreadsheets';
+export const GOOGLE_SPEADSHEET_URL = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}`;
 
 // Reids
 const { REDIS_URL } = process.env;
-export const REDIS_CONFIG = {
-    path: REDIS_URL,
-};
+export const REDIS_CONFIG = { path: REDIS_URL };
 
 // MongoDB
 export const { MONGODB_URI } = process.env;
