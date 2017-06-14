@@ -13,17 +13,16 @@ let request = axios.create({
     baseURL: GOOGLE_SPEADSHEET_URL
 });
 
-const TEST_SHEET = '新表格測試';
 
 let paramsSerializer = params => qs.stringify(params, { arrayFormat: 'repeat' });
 
 
-export const getAvailableGroupsStatus = async function () {
+export const getAvailableGroupsStatus = async function (sheetName: string) {
     let reqConfig: AxiosRequestConfig = {
         params: {
             key: GOOGLE_API_KEY,
             includeGridData: true,
-            ranges: _.values(constants.GROUP_SERIAL_NUMBER_CELL).map(cell => `${TEST_SHEET}!${cell}`),
+            ranges: _.values(constants.GROUP_SERIAL_NUMBER_CELL).map(cell => `${sheetName}!${cell}`),
         },
         paramsSerializer,
     };
@@ -35,23 +34,27 @@ export const getAvailableGroupsStatus = async function () {
         let columnDataArray = sheet.data;
 
         let groupsStatus = columnDataArray.reduce((prev, columnData, index) => {
-            let rowData = columnData.rowData[0];
-            let value = rowData.values[0];
-            let backgroundColor = value.effectiveFormat.backgroundColor;
+            let rowDataArray = columnData.rowData;
+            if (rowDataArray === undefined) return prev;
+
+            let rowData = rowDataArray[0];
+            let values = rowData.values;
+            let value = values[0];
+            let backgroundColor = value.effectiveFormat ? value.effectiveFormat.backgroundColor : undefined;
             let isOk = _.isEqual(backgroundColor, STATUS.YES);
             let groupSerialName = index + 1;
             prev[index + 1] = isOk;
             return prev;
         }, {} as { [k: number]: boolean });
 
-        let availableGroupSerialNumberCell = constants.GROUP_SERIAL_NUMBER_CELL;
-        // console.log(availableGroupsStatus);
-        // console.log(groupsStatus);
-        for (let groupSerialName in groupsStatus) {
-            let status = groupsStatus[groupSerialName];
-            if (!status) delete availableGroupSerialNumberCell[groupSerialName];
-        }
-        // console.log(availableGroupsStatus);
+        let availableGroupSerialNumberCell = Object.keys(groupsStatus).reduce((prev, groupSerialNumber) => {
+            let groupStatus = groupsStatus[groupSerialNumber];
+            if (!groupStatus) return prev;
+            prev[groupSerialNumber] = constants.GROUP_SERIAL_NUMBER_CELL[groupSerialNumber];
+            return prev;
+        }, {} as GroupSerialNumberCell);
+
+        console.log(availableGroupSerialNumberCell);
         return availableGroupSerialNumberCell;
     } catch (err) {
         console.log(err.response.data);
@@ -62,20 +65,31 @@ export const getAvailableGroupsStatus = async function () {
 };
 
 
-export const queryAttendanceTableFromGroups = async function (sheetName: string = TEST_SHEET) {
-    let availableGroupSerialNumberCell = await getAvailableGroupsStatus();
+interface AttendanceTableFromGroups {
+    [k: number]: {
+        unavailableMembers: string[];
+        unfilledMembers: string[];
+        slotCount: number;
+    };
+}
+export const queryAttendanceTableFromGroups = async function (weekday: string) {
+    let sheetName = constants.SHEETS[weekday];
+    // let sheetName = '新表格測試';
+    let availableGroupSerialNumberCell = await getAvailableGroupsStatus(sheetName);
     let groupSerialNumberRange = getRangeFormGroupSerialNumberCell(availableGroupSerialNumberCell);
     console.log(groupSerialNumberRange);
 
-    let makeReqConfig = (sheetName: string) => ({
+    if (!availableGroupSerialNumberCell) return {} as AttendanceTableFromGroups;
+
+    let reqConfig = {
         params: {
             key: GOOGLE_API_KEY,
             includeGridData: true,
             ranges: _.values(groupSerialNumberRange).map(cellRange => `${sheetName}!${cellRange}`),
         },
         paramsSerializer,
-    });
-    let res = await request.get('', makeReqConfig(sheetName));
+    };
+    let res = await request.get('', reqConfig);
     let data = res.data;
     let sheets: Sheets = data.sheets;
     let sheet = sheets[0];
@@ -87,13 +101,7 @@ export const queryAttendanceTableFromGroups = async function (sheetName: string 
         });
     });
 
-    let result: {
-        [k: number]: {
-            unavailableMembers: string[];
-            unfilledMembers: string[];
-            slotCount: number;
-        }
-    } = {};
+    let result: AttendanceTableFromGroups = {};
     for (let { index, item } of enumerate(Object.keys(groupSerialNumberRange))) {
         let groupSerialNumber = item;
         let unavailableMembers: string[] = [];
@@ -131,8 +139,9 @@ export const queryAttendanceTableFromGroups = async function (sheetName: string 
 };
 
 
-export const checkRepeatMembersFromGroups = async function (sheetName: string = TEST_SHEET) {
-    let availableGroupSerialNumberCell = await getAvailableGroupsStatus();
+export const checkRepeatMembersFromGroups = async function (weekday: string) {
+    let sheetName = constants.SHEETS[weekday];
+    let availableGroupSerialNumberCell = await getAvailableGroupsStatus(sheetName);
     let groupSerialNumberRange = getRangeFormGroupSerialNumberCell(availableGroupSerialNumberCell);
     console.log(groupSerialNumberRange);
 
@@ -203,8 +212,9 @@ export const checkRepeatMembersFromGroups = async function (sheetName: string = 
 };
 
 
-export async function getUnjoinMembers(sheetName: string = TEST_SHEET) {
-    let availableGroupSerialNumberCell = await getAvailableGroupsStatus();
+export async function getUnjoinMembers(weekday: string) {
+    let sheetName = constants.SHEETS[weekday];
+    let availableGroupSerialNumberCell = await getAvailableGroupsStatus(sheetName);
     let groupSerialNumberRange = getRangeFormGroupSerialNumberCell(availableGroupSerialNumberCell);
 
     let reqConfig = {

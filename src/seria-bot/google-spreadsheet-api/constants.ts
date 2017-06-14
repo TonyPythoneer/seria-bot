@@ -2,7 +2,7 @@ import { parseCell, range } from './utilities';
 import { GroupSerialNumberCell } from './types';
 
 
-const SHEETS = {
+export const SHEETS = {
     Wed: '出團確認(三)',
     Sat: '出團確認(六)',
     Sun: '出團確認(日)',

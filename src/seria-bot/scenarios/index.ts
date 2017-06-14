@@ -1,4 +1,5 @@
 import { repeat, capitalize } from 'lodash';
+import * as _ from 'lodash';
 
 import * as api from './../google-spreadsheet-api';
 import { HOST, VERSION } from './../../core/config';
@@ -96,17 +97,78 @@ async function getHealth() {
 
 async function checkTurtleSheet(weekday: string) {
     weekday = capitalize(weekday);
-    return await api.checkTable(weekday);
+    let data = await api.checkRepeatMembersFromGroups(weekday);
+    let { totalErrorMembers, groupErrorInfo } = data;
+    let [totalErrorMemberCount, groupErrorInfoCount] = [totalErrorMembers.length, groupErrorInfo.length];
+
+    if (totalErrorMemberCount === 0 && groupErrorInfoCount === 0) return '沒有任何重複安排的人員唷~！';
+
+    let msgArray = [];
+    if (totalErrorMemberCount !== 0) msgArray.push(`* 總表重複人物： ${totalErrorMembers.join(', ')}\n`);
+    if (groupErrorInfoCount !== 0) {
+        groupErrorInfo.forEach(info => {
+            msgArray.push(`* ${info.groupSerialNumber} 團重複人物： ${info.repeatGroupMembers.join(', ')}\n`);
+        });
+    }
+    let msg = msgArray.join('\n');
+    return msg;
 }
 
+
 async function queryTurtleSheet(weekday: string) {
-    weekday = capitalize(weekday);
-    return await api.readTable(weekday);
+    weekday = _.capitalize(weekday);
+    let attendanceTableFromGroups = await api.queryAttendanceTableFromGroups(weekday);
+    console.log(attendanceTableFromGroups);
+
+    if (_.isEqual(attendanceTableFromGroups, {})) return '團表還未啟用！';
+
+    let groupAttendanceStatusList = Object.keys(attendanceTableFromGroups)
+        .reduce((prev, groupSerialNumber) => {
+            let groupInfo = attendanceTableFromGroups[groupSerialNumber];
+            if (groupInfo.unavailableMembers.length === 0 &&
+                groupInfo.unfilledMembers.length === 0 &&
+                groupInfo.slotCount === 0) {
+                prev.completeGroupList.push(groupSerialNumber);
+            } else {
+                prev.incompleteGroupList.push(groupSerialNumber);
+            }
+            return prev;
+        }, { completeGroupList: [], incompleteGroupList: [] });
+
+    let msgArray = [`* 已完成填表團隊： ${groupAttendanceStatusList.completeGroupList.join(', ')}\n`];
+    if (groupAttendanceStatusList.incompleteGroupList.length !== 0) {
+        msgArray.push(`* 未完成填表團隊：`);
+        for (let groupSerialNumber of groupAttendanceStatusList.incompleteGroupList) {
+            let groupInfo = attendanceTableFromGroups[groupSerialNumber];
+            let { unavailableMembers, unfilledMembers, slotCount } = groupInfo;
+            let incompleteMsgArray = [`  * ${groupSerialNumber} 團：`];
+
+            let unavailableMemberCount = unavailableMembers.length;
+            if (unavailableMemberCount !== 0) {
+                let unavailableMembersString = unavailableMemberCount <= 4 ? unavailableMembers.join(', ') : '省略';
+                incompleteMsgArray.push(`    * 不可：${unavailableMemberCount}。${unavailableMembersString}。`);
+            }
+
+            let unfilledMemberCount = unfilledMembers.length;
+            if (unfilledMemberCount !== 0) {
+                let unfilledMembersString = unfilledMemberCount <= 4 ? unfilledMembers.join(', ') : '省略';
+                incompleteMsgArray.push(`    * 未填：${unfilledMemberCount}。${unfilledMembersString}。`);
+            }
+
+            if (slotCount !== 0) incompleteMsgArray.push(`    * 空位：${slotCount}。`);
+
+            msgArray.push(`${incompleteMsgArray.join('\n')}\n`);
+        }
+    }
+    return msgArray.join('\n');
 }
+
 
 async function queryUnjoinTurtleSheet(weekday: string) {
     weekday = capitalize(weekday);
-    return await api.getUnjoinMembers(weekday);
+    let data = await api.getUnjoinMembers(weekday);
+    let msg = `* 未出席名單：\n${data.unjoinList.join(', ')}`;
+    return msg;
 }
 
 export async function parseText(text: string) {
@@ -121,5 +183,3 @@ export async function parseText(text: string) {
     }
     return null;
 }
-
-
