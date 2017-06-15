@@ -8,7 +8,7 @@ import { PORT } from './core/config';
 import { runServer } from './server';
 
 
-const CPU_NUM = cpus().length;
+const CPU_NUM = 2;
 
 
 if (cluster.isMaster) {

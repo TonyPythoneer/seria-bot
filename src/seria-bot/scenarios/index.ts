@@ -98,6 +98,8 @@ async function getHealth() {
 async function checkTurtleSheet(weekday: string) {
     weekday = capitalize(weekday);
     let data = await api.checkRepeatMembersFromGroups(weekday);
+    if (_.isEqual(data, {})) return '團表還未啟用！';
+
     let { totalErrorMembers, groupErrorInfo } = data;
     let [totalErrorMemberCount, groupErrorInfoCount] = [totalErrorMembers.length, groupErrorInfo.length];
 
@@ -167,6 +169,7 @@ async function queryTurtleSheet(weekday: string) {
 async function queryUnjoinTurtleSheet(weekday: string) {
     weekday = capitalize(weekday);
     let data = await api.getUnjoinMembers(weekday);
+    if (_.isEqual(data, {})) return '團表還未啟用！';
     let msg = `* 未出席名單：\n${data.unjoinList.join(', ')}`;
     return msg;
 }

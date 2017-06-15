@@ -79,7 +79,7 @@ export const queryAttendanceTableFromGroups = async function (weekday: string) {
     let groupSerialNumberRange = getRangeFormGroupSerialNumberCell(availableGroupSerialNumberCell);
     console.log(groupSerialNumberRange);
 
-    if (!availableGroupSerialNumberCell) return {} as AttendanceTableFromGroups;
+    if (_.isEqual(availableGroupSerialNumberCell, {})) return {} as AttendanceTableFromGroups;
 
     let reqConfig = {
         params: {
@@ -139,11 +139,20 @@ export const queryAttendanceTableFromGroups = async function (weekday: string) {
 };
 
 
+interface RepeatMembersFromGroups {
+    totalErrorMembers: string[];
+    groupErrorInfo: [{
+        groupSerialNumber: string;
+        repeatGroupMembers: string[];
+    }];
+}
 export const checkRepeatMembersFromGroups = async function (weekday: string) {
     let sheetName = constants.SHEETS[weekday];
     let availableGroupSerialNumberCell = await getAvailableGroupsStatus(sheetName);
     let groupSerialNumberRange = getRangeFormGroupSerialNumberCell(availableGroupSerialNumberCell);
     console.log(groupSerialNumberRange);
+
+    if (_.isEqual(availableGroupSerialNumberCell, {})) return {} as RepeatMembersFromGroups;
 
     let reqConfig = {
         params: {
@@ -155,17 +164,10 @@ export const checkRepeatMembersFromGroups = async function (weekday: string) {
         paramsSerializer,
     };
 
-    interface Result {
-        totalErrorMembers: string[];
-        groupErrorInfo: [{
-            groupSerialNumber: string;
-            repeatGroupMembers: string[];
-        }];
-    }
     let result = {
         totalErrorMembers: [],
         groupErrorInfo: [],
-    } as Result;
+    } as RepeatMembersFromGroups;
 
 
     //
@@ -212,9 +214,15 @@ export const checkRepeatMembersFromGroups = async function (weekday: string) {
 };
 
 
+interface UnjoinMembers {
+    unjoinList: string[];
+}
 export async function getUnjoinMembers(weekday: string) {
     let sheetName = constants.SHEETS[weekday];
     let availableGroupSerialNumberCell = await getAvailableGroupsStatus(sheetName);
+
+    if (_.isEqual(availableGroupSerialNumberCell, {})) return {} as UnjoinMembers;
+
     let groupSerialNumberRange = getRangeFormGroupSerialNumberCell(availableGroupSerialNumberCell);
 
     let reqConfig = {
@@ -269,7 +277,7 @@ export async function getUnjoinMembers(weekday: string) {
 
         let unjoinList = _.difference(mamberNameList, totalMembers);
         console.log(unjoinList);
-        return { unjoinList };
+        return { unjoinList } as UnjoinMembers;
 
     } catch (err) {
         console.log(err.response.data);
