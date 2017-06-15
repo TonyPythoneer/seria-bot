@@ -137,7 +137,11 @@ async function queryTurtleSheet(weekday: string) {
             return prev;
         }, { completeGroupList: [], incompleteGroupList: [] });
 
-    let msgArray = [`* 已完成填表團隊： ${groupAttendanceStatusList.completeGroupList.join(', ')}\n`];
+    let msgArray = [];
+
+    if (groupAttendanceStatusList.completeGroupList.length !== 0)
+        msgArray.push(`* 已完成填表團隊： ${groupAttendanceStatusList.completeGroupList.join(', ')}\n`);
+
     if (groupAttendanceStatusList.incompleteGroupList.length !== 0) {
         msgArray.push(`* 未完成填表團隊：`);
         for (let groupSerialNumber of groupAttendanceStatusList.incompleteGroupList) {

@@ -1,6 +1,7 @@
 import axios, { AxiosRequestConfig } from 'axios';
 import * as qs from 'qs';
 import * as _ from 'lodash';
+import * as util from 'util';
 
 import { STATUS } from './constants';
 import * as constants from './constants';
@@ -198,12 +199,13 @@ export const checkRepeatMembersFromGroups = async function (weekday: string) {
                 });
 
             });
+
+            if (repeatGroupMembers.length !== 0) result.groupErrorInfo.push({ groupSerialNumber, repeatGroupMembers });
             groupMembers = [];
             repeatGroupMembers = [];
-            result.groupErrorInfo.push({ groupSerialNumber, repeatGroupMembers });
         }
         result.totalErrorMembers = totalErrorMembers;
-        // console.log(result);
+        console.log(util.inspect(result));
         return result;
     } catch (err) {
         console.log(err.response.data);
@@ -212,6 +214,8 @@ export const checkRepeatMembersFromGroups = async function (weekday: string) {
         throw err;
     }
 };
+
+checkRepeatMembersFromGroups('Sun');
 
 
 interface UnjoinMembers {
