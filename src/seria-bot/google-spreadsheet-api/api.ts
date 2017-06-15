@@ -215,8 +215,6 @@ export const checkRepeatMembersFromGroups = async function (weekday: string) {
     }
 };
 
-checkRepeatMembersFromGroups('Sun');
-
 
 interface UnjoinMembers {
     unjoinList: string[];
