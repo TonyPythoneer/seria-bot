@@ -1,6 +1,6 @@
 {
   "name": "seria-bot",
-  "version": "0.4.3",
+  "version": "0.5.0",
   "main": "dist/index.js",
   "repository": "https://github.com/TonyPythoneer/seria-bot.git",
   "author": "TonyPythoneer <tonypythoneer@gmail.com>",
@@ -10,7 +10,7 @@
     "build": "tsc"
   },
   "engines": {
-    "node": "6.10.2"
+    "node": "8.1.2"
   },
   "devDependencies": {
     "@types/express": "^4.0.35",

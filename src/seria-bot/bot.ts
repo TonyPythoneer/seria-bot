@@ -1,4 +1,4 @@
-import LineBot = require('linebot');
+import * as LineBot from 'linebot';
 import * as _ from 'lodash';
 
 import { LINE_BOT_CONFIG, VERSION } from './../core/config';
