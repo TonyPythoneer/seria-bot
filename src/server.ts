@@ -2,6 +2,7 @@ import * as express from 'express';
 import * as path from 'path';
 
 import { PORT, PROJECT_DIR } from './core/config';
+import rollbar from './core/rollbar';
 import { ExpressUrlpatterns } from './lib/types';
 
 
@@ -27,6 +28,9 @@ function createApplicationServer() {
             console.log(`Install express app: ${appname}, ${url}`);
         }
     }
+
+    // Use the rollbar error handler to send exceptions to your rollbar account
+    app.use(rollbar.errorHandler());
 
     return app;
 }

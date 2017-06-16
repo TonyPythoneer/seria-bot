@@ -49,3 +49,6 @@ export const REDIS_CONFIG = { path: REDIS_URL };
 
 // MongoDB
 export const { MONGODB_URI } = process.env;
+
+// Rollbar
+export const { ROLLBAR_ACCESS_TOKEN } = process.env;
