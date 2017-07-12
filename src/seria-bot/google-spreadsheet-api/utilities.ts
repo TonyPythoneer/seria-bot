@@ -13,8 +13,7 @@ export function* enumerate<T>(iterable: T[]) {
 
 
 export function getMembername(member: string) {
-    const NameAndJobRegx = new RegExp('(\.+)\\((\.+)\\)');
-    let [original, name, job] = NameAndJobRegx.exec(member);
+    let name = member.split('(', 1).pop();
     return name;
 }
 
