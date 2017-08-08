@@ -183,6 +183,7 @@ export const checkRepeatMembersFromGroups = async function (weekday: string) {
         for (let { index, item } of enumerate(Object.keys(groupSerialNumberRange))) {
             let groupSerialNumber = item;
             let group = valueRanges[index].values;
+            if (!!group) continue;
 
             let groupMembers: string[] = [];
             let repeatGroupMembers: string[] = [];
