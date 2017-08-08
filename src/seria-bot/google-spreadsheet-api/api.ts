@@ -190,8 +190,14 @@ export const checkRepeatMembersFromGroups = async function (weekday: string) {
                 team.forEach(memberWithJob => {
                     if (!memberWithJob) return;
 
+                    // for events
+                    if (totalMembers.filter(member => member === memberWithJob).length > 1) totalErrorMembers.push(memberWithJob);
+                    totalMembers.push(memberWithJob);
+
+                    /*
                     if (totalMembers.indexOf(memberWithJob) !== -1) totalErrorMembers.push(memberWithJob);
                     totalMembers.push(memberWithJob);
+                    */
 
                     let memberName = getMembername(memberWithJob);
                     if (groupMembers.indexOf(memberName) !== -1) repeatGroupMembers.push(memberName);
@@ -208,9 +214,7 @@ export const checkRepeatMembersFromGroups = async function (weekday: string) {
         console.log(util.inspect(result));
         return result;
     } catch (err) {
-        console.log(err.response.data);
-        console.log(err.message);
-        console.log(err.config);
+        console.log(err);
         throw err;
     }
 };
