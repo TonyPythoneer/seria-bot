@@ -176,14 +176,14 @@ export const checkRepeatMembersFromGroups = async function (weekday: string) {
         let res = await request.get(`/values:batchGet`, reqConfig);
         let data = res.data;
         let valueRanges: ValueRanges = data.valueRanges;
-        let groups = valueRanges.map(valueRange => valueRange.values);
+        let groups = valueRanges.map(valueRange => valueRange.values || []);
 
         let totalMembers = [];
         let totalErrorMembers = [];
         for (let { index, item } of enumerate(Object.keys(groupSerialNumberRange))) {
             let groupSerialNumber = item;
-            let group = valueRanges[index].values;
-            if (!!group) continue;
+            let group = groups[index];
+            if (group.length === 0) continue;
 
             let groupMembers: string[] = [];
             let repeatGroupMembers: string[] = [];
@@ -192,13 +192,13 @@ export const checkRepeatMembersFromGroups = async function (weekday: string) {
                     if (!memberWithJob) return;
 
                     // for events
+                    /*
                     if (totalMembers.filter(member => member === memberWithJob).length > 1) totalErrorMembers.push(memberWithJob);
                     totalMembers.push(memberWithJob);
+                    */
 
-                    /*
                     if (totalMembers.indexOf(memberWithJob) !== -1) totalErrorMembers.push(memberWithJob);
                     totalMembers.push(memberWithJob);
-                    */
 
                     let memberName = getMembername(memberWithJob);
                     if (groupMembers.indexOf(memberName) !== -1) repeatGroupMembers.push(memberName);
