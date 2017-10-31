@@ -24,7 +24,7 @@ export const STATUS = {
 const GROUP_SHEET_INFO = {
     BASE_GROUP_NUMBER_CELL: 'A2',
     ROWS: 4,
-    COLUMNS: 3,
+    COLUMNS: 4,
     DIFF_ROW: 7,
     DIFF_COLUMN: 6,
 };
